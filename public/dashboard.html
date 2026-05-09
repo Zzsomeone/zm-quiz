@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>珠免酒鬼人格测试 - 数据后台</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+  :root {
+    --primary: #1A1A2E; --accent: #E94560; --gold: #D4A853;
+    --bg: #F4F3F0; --card: #FFFFFF; --text: #2D2D2D; --border: #E2DFDA;
+    --shadow: rgba(26,26,46,0.06); --radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+
+  /* 登录遮罩 */
+  .login-overlay { position:fixed; inset:0; background:linear-gradient(135deg,#1A1A2E,#16213E); display:flex; align-items:center; justify-content:center; z-index:9999; }
+  .login-box { background:white; border-radius:20px; padding:40px; width:360px; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+  .login-title { font-size:24px; font-weight:900; text-align:center; margin-bottom:8px; color:var(--primary); }
+  .login-sub { font-size:13px; text-align:center; color:#888; margin-bottom:30px; }
+  .login-input { width:100%; padding:14px 16px; border:2px solid var(--border); border-radius:12px; font-size:15px; margin-bottom:16px; outline:none; transition:border-color .2s; }
+  .login-input:focus { border-color:var(--accent); }
+  .login-btn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--accent),#C0392B); color:white; font-size:16px; font-weight:700; cursor:pointer; transition:transform .2s,box-shadow .2s; }
+  .login-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(233,69,96,.4); }
+  .login-error { color:#E74C3C; font-size:13px; text-align:center; margin-top:12px; min-height:20px; }
+  .login-hint { font-size:12px; color:#AAA; text-align:center; margin-top:20px; }
+
+  /* 顶部导航 */
+  .topbar { background:linear-gradient(135deg,var(--primary),#16213E); padding:18px 32px; display:flex; align-items:center; justify-content:space-between; color:white; position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.15); }
+  .topbar .brand { font-size:20px; font-weight:800; letter-spacing:.5px; }
+  .topbar .brand span { color:var(--gold); }
+  .topbar .sub { font-size:12px; opacity:.7; margin-top:2px; }
+  .topbar-right { display:flex; align-items:center; gap:14px; }
+  .btn { padding:8px 20px; border-radius:10px; border:none; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; display:inline-flex;align-items:center;gap:6px; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),#C0392B); color:white; box-shadow:0 3px 14px rgba(233,69,96,.35); }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 5px 20px rgba(233,69,96,.45); }
+  .btn-gold { background:linear-gradient(135deg,var(--gold),#C9A227); color:white; box-shadow:0 3px 14px rgba(212,168,83,.35); }
+  .btn-outline { background:rgba(255,255,255,.1); color:white; border:1px solid rgba(255,255,255,.25); backdrop-filter:blur(10px); }
+  .btn-outline:hover { background:rgba(255,255,255,.2); }
+  .user-badge { display:flex; align-items:center; gap:8px; padding:6px 14px; background:rgba(255,255,255,.1); border-radius:20px; font-size:13px; }
+  .user-badge .role { background:var(--gold); color:var(--primary); padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+
+  .container { max-width:1360px; margin:0 auto; padding:24px; }
+
+  /* 汇总卡片 */
+  .cards-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
+  .summary-card { background:var(--card); border-radius:var(--radius); padding:22px; box-shadow:0 2px 16px var(--shadow); position:relative; overflow:hidden; }
+  .summary-card::after { content:''; position:absolute; top:0;left:0;width:4px;height:100%; border-radius:4px 0 0 4px; }
+  .sc-total::after { background:var(--accent); }
+  .sc-today::after { background:var(--gold); }
+  .sc-top::after { background:#27AE60; }
+  .sc-avg::after { background:#3498DB; }
+  .sc-label { font-size:12px; color:#888; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+  .sc-value { font-size:32px; font-weight:900; color:var(--primary); margin-top:4px; }
+  .sc-sub { font-size:12px; color:#AAA; margin-top:4px; }
+
+  /* 筛选栏 */
+  .filter-bar { background:var(--card); border-radius:var(--radius); padding:16px 24px; margin-bottom:24px; box-shadow:0 2px 12px var(--shadow); display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+  .filter-bar label { font-size:13px; font-weight:700; color:#555; white-space:nowrap; }
+  .filter-bar input, .filter-bar select { padding:8px 14px; border:2px solid var(--border); border-radius:10px; font-size:13px; outline:none; transition:border-color .2s; background:white; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color:var(--accent); }
+  .f-btn { padding:8px 18px; border-radius:10px; border:2px solid var(--accent); background:transparent; color:var(--accent); font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .f-btn:hover { background:var(--accent); color:white; }
+  .f-reset { border-color:#CCC;color:#888; }
+  .f-reset:hover { background:#CCC;color:white; }
+
+  /* 图表区域 */
+  .charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+  .chart-card { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:0 2px 16px var(--shadow); }
+  .chart-card.full { grid-column:1/-1; }
+  .chart-title { font-size:15px; font-weight:800; color:var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+  .chart-wrap { width:100%; min-height:300px; }
+
+  /* 数据表格 */
+  .table-section { background:var(--card); border-radius:var(--radius); box-shadow:0 2px 16px var(--shadow); overflow:hidden; margin-bottom:24px; }
+  .table-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--border); }
+  .table-title { font-size:16px; font-weight:800; color:var(--primary); }
+  .table-info { font-size:13px; color:#999; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#FAFAFA; padding:12px 16px; text-align:left; font-size:12px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:.5px; border-bottom:2px solid var(--border); white-space:nowrap; }
+  td { padding:11px 16px; font-size:13px; border-bottom:1px solid #F0EEE8; vertical-align:middle; }
+  tr:hover td { background:#FEFCFA; }
+  .mbti-badge { display:inline-block; width:48px; text-align:center; padding:3px 0; border-radius:6px; font-size:12px; font-weight:800; color:white; }
+
+  /* 分页 */
+  .pagination { display:flex; align-items:center; justify-content:center; gap:8px; padding:16px; border-top:1px solid var(--border); }
+  .page-btn { padding:6px 14px; border:1px solid var(--border); border-radius:8px; background:white; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; }
+  .page-btn:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+  .page-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
+  .page-btn:disabled { opacity:.4; cursor:not-allowed; }
+  .page-info { font-size:13px; color:#888; }
+
+  /* 用户管理弹窗 */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:200; }
+  .modal-box { background:white; border-radius:20px; padding:30px; width:400px; max-height:80vh; overflow:auto; }
+  .modal-title { font-size:18px; font-weight:800; margin-bottom:20px; color:var(--primary); }
+  .modal-close { float:right; font-size:24px; cursor:pointer; color:#999; line-height:1; }
+  .user-list { margin-bottom:20px; }
+  .user-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #EEE; }
+  .user-info { font-size:14px; }
+  .user-info small { color:#888; }
+  .btn-sm { padding:4px 12px; border-radius:6px; font-size:12px; cursor:pointer; border:none; }
+  .btn-del { background:#FEE; color:#C00; }
+  .form-row { margin-bottom:12px; }
+  .form-row label { display:block; font-size:13px; font-weight:600; margin-bottom:4px; }
+  .form-row input, .form-row select { width:100%; padding:10px; border:2px solid var(--border); border-radius:8px; font-size:14px; }
+
+  @media(max-width:900px) {
+    .charts-grid { grid-template-columns:1fr; }
+    .container { padding:16px; }
+    .cards-row { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 登录遮罩 -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-title">🍸 珠免数据后台</div>
+    <div class="login-sub">请登录以查看测试数据</div>
+    <input type="text" class="login-input" id="loginUser" placeholder="用户名" autocomplete="username">
+    <input type="password" class="login-input" id="loginPass" placeholder="密码" autocomplete="current-password">
+    <button class="login-btn" onclick="doLogin()">登 录</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-hint">首次使用请联系管理员开通账号</div>
+  </div>
+</div>
+
+<!-- 用户管理弹窗 -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeUserModal()">&times;</span>
+    <div class="modal-title">👥 用户管理</div>
+    <div class="user-list" id="userList">加载中...</div>
+    <hr style="margin:20px 0;border-color:#EEE">
+    <div style="font-weight:700;margin-bottom:12px">添加新用户</div>
+    <div class="form-row"><label>用户名</label><input type="text" id="newUser"></div>
+    <div class="form-row"><label>密码</label><input type="password" id="newPass"></div>
+    <div class="form-row"><label>角色</label><select id="newRole"><option value="viewer">查看者</option><option value="admin">管理员</option></select></div>
+    <button class="btn btn-primary" onclick="addUser()" style="width:100%">添加用户</button>
+  </div>
+</div>
+
+<!-- 顶部导航 -->
+<div class="topbar">
+  <div>
+    <div class="brand">🍸 <span>珠免酒鬼人格测试</span></div>
+    <div class="sub">数据采集 & 分析看板</div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-badge" id="userBadge">
+      <span id="userName">-</span>
+      <span class="role" id="userRole">-</span>
+    </div>
+    <button class="btn btn-gold" onclick="doExport()">📥 导出</button>
+    <a href="/" target="_blank" class="btn btn-outline">🔗 测试页</a>
+    <button class="btn btn-primary" onclick="loadData()">🔄 刷新</button>
+    <button class="btn btn-outline" id="btnUserMgmt" style="display:none" onclick="openUserModal()">👥 用户</button>
+    <button class="btn btn-outline" onclick="doLogout()">退出</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 汇总卡片 -->
+  <div class="cards-row" id="summaryCards">
+    <div class="summary-card sc-total">
+      <div class="sc-label">📊 总参与人数</div>
+      <div class="sc-value" id="valTotal">-</div>
+      <div class="sc-sub" id="subTotal"></div>
+    </div>
+    <div class="summary-card sc-today">
+      <div class="sc-label">📅 今日新增</div>
+      <div class="sc-value" id="valToday">-</div>
+      <div class="sc-sub" id="subToday"></div>
+    </div>
+    <div class="summary-card sc-top">
+      <div class="sc-label">🏆 最热人格</div>
+      <div class="sc-value" id="valTop" style="font-size:20px;">-</div>
+      <div class="sc-sub">按人数排名</div>
+    </div>
+    <div class="summary-card sc-avg">
+      <div class="sc-label">📈 日均参与</div>
+      <div class="sc-value" id="valAvg">-</div>
+      <div class="sc-sub" id="subRange"></div>
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="filter-bar">
+    <label>📅 开始</label><input type="date" id="fDateFrom">
+    <label>结束</label><input type="date" id="fDateTo">
+    <label>🎭 MBTI</label>
+    <select id="fMbti"><option value="">全部</option></select>
+    <button class="f-btn" onclick="applyFilter()">查询</button>
+    <button class="f-btn f-reset" onclick="resetFilter()">重置</button>
+  </div>
+
+  <!-- 图表区域 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">🥧 人格分布</div>
+      <div class="chart-wrap" id="chartPie"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📊 维度倾向</div>
+      <div class="chart-wrap" id="chartBar"></div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">📈 每日趋势</div>
+      <div class="chart-wrap" id="chartLine"></div>
+    </div>
+  </div>
+
+  <!-- 数据表格 -->
+  <div class="table-section">
+    <div class="table-header">
+      <div class="table-title">📋 测试记录</div>
+      <div class="table-info" id="tableInfo">加载中...</div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>时间</th><th>MBTI</th><th>人格</th><th>E/I</th><th>S/N</th><th>T/F</th><th>J/P</th><th>设备</th></tr></thead>
+      <tbody id="tableBody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#CCC;">暂无数据</td></tr></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+</div>
+
+<script>
+let token = localStorage.getItem('zm_token');
+let currentUser = null;
+let currentPage = 1;
+const pageSize = 50;
+
+const mbtiColors = {
+  ESTJ:'#C0392B',ESFP:'#27AE60',ENFJ:'#27AE60',ENTP:'#2980B9',
+  ENTJ:'#C0392B',ISTJ:'#2980B9',ISFJ:'#27AE60',ISTP:'#27AE60',
+  INFP:'#8E44AD',INFJ:'#8E44AD',INTJ:'#2980B9',INTP:'#27AE60',
+  ISFP:'#2980B9',ESTP:'#C0392B',ENFP:'#E67E22'
+};
+
+// 登录
+function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if (!username || !password) { document.getElementById('loginError').textContent = '请输入用户名和密码'; return; }
+
+  fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      token = d.token;
+      currentUser = d.user;
+      localStorage.setItem('zm_token', token);
+      showDashboard();
+    } else {
+      document.getElementById('loginError').textContent = d.error || '登录失败';
+    }
+  })
+  .catch(e => { document.getElementById('loginError').textContent = '网络错误'; });
+}
+
+function showDashboard() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('userName').textContent = currentUser.displayName || currentUser.username;
+  document.getElementById('userRole').textContent = currentUser.role === 'admin' ? '管理员' : '查看者';
+  document.getElementById('btnUserMgmt').style.display = currentUser.role === 'admin' ? 'inline-flex' : 'none';
+  loadStats();
+  loadData();
+}
+
+function doLogout() {
+  localStorage.removeItem('zm_token');
+  token = null;
+  currentUser = null;
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+
+// 带认证的 fetch
+function authFetch(url, opts = {}) {
+  return fetch(url, {
+    ...opts,
+    headers: { ...opts.headers, 'Authorization': `Bearer ${token}` }
+  });
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+  const d = new Date();
+  document.getElementById('fDateTo').value = d.toISOString().slice(0,10);
+  d.setDate(d.getDate() - 30);
+  document.getElementById('fDateFrom').value = d.toISOString().slice(0,10);
+
+  const sel = document.getElementById('fMbti');
+  Object.keys(mbtiColors).forEach(m => { let o = document.createElement('option'); o.value = m; o.textContent = m; sel.appendChild(o); });
+
+  // 检查已登录
+  if (token) {
+    // 验证 token 有效性
+    authFetch('/api/stats').then(r => r.json()).then(d => {
+      if (d.error && d.error.includes('登录')) { doLogout(); }
+      else { currentUser = { username: '用户', role: 'viewer' }; showDashboard(); }
+    }).catch(() => doLogout());
+  }
+});
+
+// 加载统计
+function loadStats() {
+  const params = new URLSearchParams({
+    date_from: document.getElementById('fDateFrom').value,
+    date_to: document.getElementById('fDateTo').value
+  });
+  authFetch('/api/stats?' + params)
+    .then(r => r.json())
+    .then(d => {
+      if (d.error) { alert(d.error); return; }
+      document.getElementById('valTotal').textContent = d.summary.total.toLocaleString();
+      document.getElementById('subTotal').textContent = '累计参与人次';
+      const yoy = d.summary.yesterday > 0 ? ((d.summary.today - d.summary.yesterday) / d.summary.yesterday * 100).toFixed(0) : null;
+      document.getElementById('valToday').textContent = d.summary.today.toLocaleString();
+      document.getElementById('subToday').textContent = yoy !== null ? (yoy >= 0 ? `较昨日 +${yoy}%` : `较昨日 ${yoy}%`) : '昨日无数据';
+      document.getElementById('valTop').textContent = d.summary.top_mbti || '-';
+      document.getElementById('valAvg').textContent = d.summary.avg_daily;
+      document.getElementById('subRange').textContent = d.summary.date_range;
+      Plotly.newPlot('chartPie', d.charts.pie, {responsive:true, displayModeBar:false});
+      Plotly.newPlot('chartBar', d.charts.bar, {responsive:true, displayModeBar:false});
+      Plotly.newPlot('chartLine', d.charts.line, {responsive:true, displayModeBar:false});
+    })
+    .catch(e => console.error('Stats error:', e));
+}
+
+function loadData() {
+  const params = new URLSearchParams({
+    date_from: document.getElementById('fDateFrom').value,
+    date_to: document.getElementById('fDateTo').value,
+    mbti: document.getElementById('fMbti').value,
+    page: currentPage,
+    page_size: pageSize
+  });
+  authFetch('/api/data?' + params)
+    .then(r => r.json())
+    .then(d => renderTable(d))
+    .catch(e => console.error('Data error:', e));
+}
+
+function renderTable(d) {
+  const tbody = document.getElementById('tableBody');
+  if (!d.data || d.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#CCC;">暂无数据</td></tr>';
+    document.getElementById('tableInfo').textContent = '共 0 条';
+    return;
+  }
+  tbody.innerHTML = d.data.map(row => `
+    <tr>
+      <td>${row.id}</td>
+      <td><small>${row.created_at}</small></td>
+      <td><span class="mbti-badge" style="background:${mbtiColors[row.mbti_type]||'#999'}">${row.mbti_type}</span></td>
+      <td style="font-weight:600">${row.type_name||'-'}</td>
+      <td>${row.dim_e} : ${row.dim_i}</td>
+      <td>${row.dim_s} : ${row.dim_n}</td>
+      <td>${row.dim_t} : ${row.dim_f}</td>
+      <td>${row.dim_j} : ${row.dim_p}</td>
+      <td><small style="color:#AAA">${row.screen||'-'}</small></td>
+    </tr>`).join('');
+  document.getElementById('tableInfo').textContent = `共 ${d.total} 条，第 ${d.page} 页`;
+  const totalPages = Math.ceil(d.total / pageSize);
+  let pgHtml = `<span class="page-info">共${totalPages}页</span>`;
+  pgHtml += `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''}>上一页</button>`;
+  for (let i=Math.max(1,currentPage-3); i<=Math.min(totalPages,currentPage+3); i++) {
+    pgHtml += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  pgHtml += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>下一页</button>`;
+  document.getElementById('pagination').innerHTML = pgHtml;
+}
+
+function goPage(p) { if (p<1)return; currentPage = p; loadData(); window.scrollTo({top: document.querySelector('.table-section').offsetTop-80,behavior:'smooth'}); }
+function applyFilter() { currentPage = 1; loadStats(); loadData(); }
+function resetFilter() { document.getElementById('fMbti').value = ''; applyFilter(); }
+
+function doExport() {
+  const params = new URLSearchParams({
+    date_from: document.getElementById('fDateFrom').value,
+    date_to: document.getElementById('fDateTo').value,
+    mbti: document.getElementById('fMbti').value
+  });
+  // 导出需要带 token，用 fetch 下载
+  authFetch('/api/export?' + params)
+    .then(r => r.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `zm-quiz-export-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+}
+
+// 用户管理
+function openUserModal() {
+  document.getElementById('userModal').style.display = 'flex';
+  loadUsers();
+}
+function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
+
+function loadUsers() {
+  authFetch('/api/auth/users')
+    .then(r => r.json())
+    .then(d => {
+      if (d.users) {
+        document.getElementById('userList').innerHTML = d.users.map(u => `
+          <div class="user-row">
+            <div class="user-info"><b>${u.username}</b> <small>(${u.role === 'admin' ? '管理员' : '查看者'})</small></div>
+            ${u.id !== currentUser?.id ? `<button class="btn-sm btn-del" onclick="delUser(${u.id})">删除</button>` : ''}
+          </div>
+        `).join('');
+      }
+    });
+}
+
+function addUser() {
+  const username = document.getElementById('newUser').value.trim();
+  const password = document.getElementById('newPass').value;
+  const role = document.getElementById('newRole').value;
+  if (!username || !password) { alert('请填写完整'); return; }
+  authFetch('/api/auth/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password, role })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) { document.getElementById('newUser').value = ''; document.getElementById('newPass').value = ''; loadUsers(); }
+    else alert(d.error);
+  });
+}
+
+function delUser(id) {
+  if (!confirm('确定删除该用户？')) return;
+  authFetch('/api/auth/users', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) loadUsers(); else alert(d.error); });
+}
+
+// 回车登录
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+</script>
+</body>
+</html>
