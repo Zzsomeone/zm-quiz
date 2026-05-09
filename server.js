@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 let pool;
 function getPool() {
-  if (!pool) pool = new Pool({ connectionString: process.env.POSTGRES_URL, ssl: { rejectUnauthorized: false }, max: 5 });
+  if (!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL, ssl: { rejectUnauthorized: false }, max: 5 });
   return pool;
 }
 async function query(text, params) { return getPool().query(text, params); }
