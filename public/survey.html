@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🍸 你的喝酒人格是什么？— 珠免酒鬼人格测试</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --primary: #1A1A2E;
+    --accent: #E94560;
+    --gold: #D4A853;
+    --bg: #F8F7F4;
+    --card-bg: #FFFFFF;
+    --text: #2D2D2D;
+    --text-light: #777;
+    --border: #E8E4DF;
+    --shadow: rgba(26,26,46,0.08);
+    
+    /* 16人格主题色 */
+    --estj: #C0392B; --esfp: #27AE60; --enfj: #27AE60; --entp: #2980B9;
+    --entj: #C0392B; --istj: #2980B9; --isfj: #27AE60; --istp: #27AE60;
+    --infp: #8E44AD; --infj: #8E44AD; --intj: #2980B9; --intp: #27AE60;
+    --isfp: #2980B9; --estp: #C0392B; --enfp: #E67E22;
+  }
+  
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+  
+  /* ===== 头部 ===== */
+  .header {
+    text-align: center;
+    padding: 32px 0 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, #16213E 50%, #0F3460 100%);
+    color: white;
+    border-radius: 0 0 28px 28px;
+    margin: -16px -16px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(233,69,96,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(212,168,83,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-emoji { font-size: 48px; margin-bottom: 8px; position: relative; z-index: 1; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 1px; position: relative; z-index: 1; }
+  .header-sub { font-size: 13px; opacity: 0.75; margin-top: 6px; position: relative; z-index: 1; }
+  .header-tags {
+    display: inline-flex;
+    gap: 8px;
+    margin-top: 14px;
+    position: relative;
+    z-index: 1;
+  }
+  .header-tag {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  
+  /* ===== 说明框 ===== */
+  .notice-box {
+    background: linear-gradient(135deg, #FEF9E7, #FFF9E6);
+    border: 1px solid #F0E4C8;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #7D6608;
+    line-height: 1.7;
+  }
+  .notice-box strong { color: #9A7B0A; }
+  
+  /* ===== 进度条 ===== */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border-radius: 30px;
+    padding: 10px 18px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: #EEE;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 0%;
+  }
+  .progress-text { font-size: 13px; font-weight: 600; color: var(--primary); min-width: 36px; text-align: right; }
+  
+  /* ===== 题目区域 ===== */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+  .section-title .emoji { font-size: 18px; }
+  
+  .dimension-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2980B9;
+    background: #EBF5FB;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  
+  .question-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 16px var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: slideUp 0.4s ease-out both;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .q-number {
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: var(--primary);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .q-text { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 14px; line-height: 1.5; }
+  
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .option:hover { border-color: #CCC; background: #FAFAFA; }
+  .option.selected {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, #FFF5F5, #FFF0F0);
+    box-shadow: 0 0 0 3px rgba(233,69,96,0.12);
+  }
+  .option-radio {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 2px solid #DDD;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .option.selected .option-radio {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .option.selected .option-radio::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+  }
+  .option-label { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; flex: 1; }
+  .option-type {
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: #2980B9;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    margin-top: 2px;
+    opacity: 0.9;
+  }
+  .option.selected .option-type { background: var(--accent); }
+  
+  /* ===== 提交按钮 ===== */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), #C0392B);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 20px 0;
+    box-shadow: 0 4px 20px rgba(233,69,96,0.35);
+    transition: all 0.25s ease;
+    letter-spacing: 2px;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(233,69,96,0.45); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled {
+    background: #CCC;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+  
+  /* ===== 结果页 ===== */
+  .result-page { display: none; animation: fadeIn 0.5s ease-out; }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .result-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 30px var(--shadow);
+    margin-bottom: 20px;
+  }
+  .result-header {
+    padding: 32px 24px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .result-header .big-emoji { font-size: 56px; margin-bottom: 8px; }
+  .result-code {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+  .result-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .result-tagline {
+    font-size: 14px;
+    font-style: italic;
+    opacity: 0.75;
+  }
+  .result-body { padding: 0 24px 24px; }
+  .result-desc {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 20px;
+  }
+  .result-products {
+    background: linear-gradient(135deg, #FFFAF0, #FFF8E8);
+    border: 1px solid #F0E4C8;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .result-products-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9A7B0A;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .result-products-list {
+    font-size: 13px;
+    color: #7D6608;
+    line-height: 1.7;
+  }
+  .result-partner {
+    font-size: 13px;
+    color: #555;
+    padding: 10px 14px;
+    background: #F5F5F5;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  .result-tip {
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+    padding: 10px 14px;
+    background: #FAFAFA;
+    border-radius: 10px;
+    border-left: 3px solid var(--gold);
+  }
+  
+  /* 维度分析 */
+  .dimension-analysis {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .da-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 14px;
+  }
+  .da-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+  .da-label {
+    width: 52px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-align: right;
+  }
+  .da-bar-wrap { flex: 1; }
+  .da-bar-bg {
+    height: 20px;
+    background: #F0F0F0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+  .da-bar {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    min-width: 36px;
+  }
+  .da-val {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--primary);
+    width: 36px;
+    text-align: center;
+  }
+  
+  /* 分享按钮 */
+  .share-section { text-align: center; margin: 20px 0; }
+  .share-hint {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 12px;
+  }
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, var(--gold), #C9A227);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(212,168,83,0.4);
+    transition: all 0.25s;
+  }
+  .share-btn:hover { transform: scale(1.05); }
+  
+  /* 优惠券区域 */
+  .coupon-area {
+    text-align: center;
+    padding: 20px;
+    margin: 20px 0;
+    background: linear-gradient(135deg, #FFF5F5, #FFE8E8);
+    border: 2px dashed var(--accent);
+    border-radius: 16px;
+  }
+  .coupon-text {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+  }
+  .coupon-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+  .coupon-action {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 6px;
+  }
+  
+  /* 微信客服二维码区域 */
+  .wechat-qr-section {
+    text-align: center;
+    padding: 24px 20px;
+    margin: 20px 0;
+    background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+    border-radius: 16px;
+    border: 1px solid #C8E6C9;
+  }
+  .qr-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2E7D32;
+    margin-bottom: 6px;
+  }
+  .qr-subtitle {
+    font-size: 12px;
+    color: #66BB6A;
+    margin-bottom: 16px;
+  }
+  .qr-container {
+    display: inline-block;
+    padding: 12px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .qr-image {
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
+    display: block;
+  }
+  .qr-hint {
+    font-size: 12px;
+    color: #81C784;
+    margin-top: 12px;
+  }
+  
+  /* 隐藏测试页 */
+  .test-page.hidden { display: none; }
+  .result-page.show { display: block; }
+  
+  /* 底部间距 */
+  .spacer { height: 40px; }
+  
+  /* 响应式微调 */
+  @media (max-width: 380px) {
+    .container { padding: 12px; }
+    .header h1 { font-size: 19px; }
+    .q-text { font-size: 14px; }
+    .option-label { font-size: 13px; }
+    .option { padding: 12px 14px; }
+  }
+
+  /* 打印/截图优化 */
+  @media print {
+    body { background: white; }
+    .submit-btn, .share-btn, .progress-bar { display: none; }
+    .result-card { box-shadow: none; border: 1px solid #EEE; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- ===== 头部 ===== -->
+  <div class="header">
+    <div class="header-emoji">🍸🫠</div>
+    <h1>你的喝酒人格是什么？</h1>
+    <div class="header-sub">— 珠免社群 · 酒鬼人格测试 —</div>
+    <div class="header-tags">
+      <span class="header-tag">14题</span>
+      <span class="header-tag">2分钟</span>
+      <span class="header-tag">16种人格</span>
+      <span class="header-tag">截图发朋友</span>
+    </div>
+  </div>
+
+  <!-- ===== 说明框 ===== -->
+  <div class="notice-box">
+    <strong>📜 先说好的：</strong>答案没有对错，跟着直觉走就行。
+  </div>
+
+  <!-- ===== 测试页面 ===== -->
+  <div class="test-page" id="testPage">
+    <!-- 进度 -->
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">0/14</div>
+      </div>
+    </div>
+
+    <!-- 题目区域 -->
+
+    <div class="question-card" data-q="1">
+      <div class="q-number">1</div>
+      <div class="q-text">周五晚上终于来了，你最想怎么过？</div>
+      <div class="options">
+        <div class="option" data-dim="EI" data-val="E" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">组局！叫上一帮朋友出来喝</div>
+          <div class="option-type">聚场型 E</div>
+        </div>
+        <div class="option" data-dim="EI" data-val="I" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">回家开一瓶，自己慢慢喝</div>
+          <div class="option-type">独酌型 I</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="2">
+      <div class="q-number">2</div>
+      <div class="q-text">你在哪种喝酒场景上花得最多？</div>
+      <div class="options">
+        <div class="option" data-dim="EI" data-val="E" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">应酬 / 聚会 / 送礼</div>
+          <div class="option-type">聚场型 E</div>
+        </div>
+        <div class="option" data-dim="EI" data-val="I" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">自饮 / 宅家配剧 / 囤货</div>
+          <div class="option-type">独酌型 I</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="3">
+      <div class="q-number">3</div>
+      <div class="q-text">看到一瓶没见过的酒，你的第一反应是？</div>
+      <div class="options">
+        <div class="option" data-dim="SN" data-val="S" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">先翻翻评价，看看别人怎么说</div>
+          <div class="option-type">经典派 S</div>
+        </div>
+        <div class="option" data-dim="SN" data-val="N" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">没试过？那必须来一瓶试试</div>
+          <div class="option-type">尝鲜派 N</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="4">
+      <div class="q-number">4</div>
+      <div class="q-text">你家现在的酒柜大概是什么画风？</div>
+      <div class="options">
+        <div class="option" data-dim="SN" data-val="S" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">几款老朋友，喝完就补同一款</div>
+          <div class="option-type">经典派 S</div>
+        </div>
+        <div class="option" data-dim="SN" data-val="N" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">品种超多，像个私人小酒博物馆</div>
+          <div class="option-type">尝鲜派 N</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="5">
+      <div class="q-number">5</div>
+      <div class="q-text">一瓶酒标价800块，你的第一反应是？</div>
+      <div class="options">
+        <div class="option" data-dim="TF" data-val="T" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">贵了，等折扣再买</div>
+          <div class="option-type">实用型 T</div>
+        </div>
+        <div class="option" data-dim="TF" data-val="F" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">喜欢就买，对自己好一点</div>
+          <div class="option-type">享受型 F</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="6">
+      <div class="q-number">6</div>
+      <div class="q-text">买酒踩过最让你不爽的坑是哪个？</div>
+      <div class="options">
+        <div class="option" data-dim="TF" data-val="T" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">买贵了，别处便宜一半</div>
+          <div class="option-type">实用型 T</div>
+        </div>
+        <div class="option" data-dim="TF" data-val="F" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">体验差，包装丑、物流慢、态度冷</div>
+          <div class="option-type">享受型 F</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="7">
+      <div class="q-number">7</div>
+      <div class="q-text">去买酒之前，你通常会怎么做？</div>
+      <div class="options">
+        <div class="option" data-dim="JP" data-val="J" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">想好目标了再去，直奔柜台</div>
+          <div class="option-type">目标型 J</div>
+        </div>
+        <div class="option" data-dim="JP" data-val="P" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">到了再慢慢逛，看心情决定</div>
+          <div class="option-type">随缘型 P</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="8">
+      <div class="q-number">8</div>
+      <div class="q-text">心心念念的酒断货了，你怎么办？</div>
+      <div class="options">
+        <div class="option" data-dim="JP" data-val="J" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">等！非这款不可</div>
+          <div class="option-type">目标型 J</div>
+        </div>
+        <div class="option" data-dim="JP" data-val="P" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">看看别的也行，容易被店员安利</div>
+          <div class="option-type">随缘型 P</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 快速画像 -->
+
+    <div class="question-card" data-q="9">
+      <div class="q-number">9</div>
+      <div class="q-text">你接触酒大概多久了？</div>
+      <div class="options">
+        <div class="option" data-dim="profile" data-val="A" data-hdim="SN" data-hval="N" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">刚入门不久，好奇心满满</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="B" data-hdim="SN" data-hval="N" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">两三年，知道自己的口味</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="C" data-hdim="SN" data-hval="S" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">五年以上，有固定的常购清单</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="D" data-hdim="SN" data-hval="S" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">老手了，说年份能猜个八九不离十</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="10">
+      <div class="q-number">10</div>
+      <div class="q-text">你平时买酒主要是为了？</div>
+      <div class="options">
+        <div class="option" data-dim="profile" data-val="self" data-hdim="EI" data-hval="I" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">自饮为主，一天最期待这一口</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="gift" data-hdim="EI" data-hval="E" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">请客送礼，场面得撑住</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="invest" data-hdim="TF" data-hval="F" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">收藏投资，好酒值钱</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="proxy" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">帮家人朋友代购</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="11">
+      <div class="q-number">11</div>
+      <div class="q-text">在酒桌上，你通常扮演什么角色？</div>
+      <div class="options">
+        <div class="option" data-dim="profile" data-val="organizer" data-hdim="EI" data-hval="E" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">组局担当，调动气氛我最行</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="teacher" data-hdim="EI" data-hval="E" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">知识库，从酿酒历史讲到调配配方</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="companion" data-hdim="EI" data-hval="I" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">安静听众，听着偶尔接一句</div>
+        </div>
+        <div class="option" data-dim="profile" data-val="economist" data-hdim="TF" data-hval="T" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">经济人，谁家便宜我清楚</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="12">
+      <div class="q-number">12</div>
+      <div class="q-text">除了白酒，你对哪些品类也感兴趣？（可多选）</div>
+      <div class="options">
+        <div class="option" data-dim="multi" data-val="whisky" data-hdim="SN" data-hval="N" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">威士忌</div>
+        </div>
+        <div class="option" data-dim="multi" data-val="wine" data-hdim="SN" data-hval="N" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">葡萄酒</div>
+        </div>
+        <div class="option" data-dim="multi" data-val="gin" data-hdim="SN" data-hval="N" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">金酒 / 伏特加（调酒用）</div>
+        </div>
+        <div class="option" data-dim="multi" data-val="brandy" data-hdim="SN" data-hval="N" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">白兰地 / 干邑</div>
+        </div>
+        <div class="option" data-dim="multi" data-val="other" data-hdim="SN" data-hval="N" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">香槟 / 果酒 / 其他</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="13">
+      <div class="q-number">13</div>
+      <div class="q-text">单瓶酒什么价位的区间最让你心动？</div>
+      <div class="options">
+        <div class="option" data-dim="price" data-val="100-300" data-hdim="TF" data-hval="T" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">100-300元，口粮不心疼</div>
+        </div>
+        <div class="option" data-dim="price" data-val="300-600" data-hdim="TF" data-hval="T" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">300-600元，有品质但不离谱</div>
+        </div>
+        <div class="option" data-dim="price" data-val="600-1200" data-hdim="TF" data-hval="F" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">600-1200元，撑场面够用了</div>
+        </div>
+        <div class="option" data-dim="price" data-val="1200+" data-hdim="TF" data-hval="F" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">1200元以上，好东西不愿将就</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 消费洞察 -->
+
+    <div class="question-card" data-q="14">
+      <div class="q-number">14</div>
+      <div class="q-text">买酒的过程中，你最不能忍的是？</div>
+      <div class="options">
+        <div class="option" data-dim="habit" data-val="stockout" data-hdim="TF" data-hval="T" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">想要的没货，大老远白跑一趟</div>
+        </div>
+        <div class="option" data-dim="habit" data-val="slow" data-hdim="TF" data-hval="T" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">物流太慢，等了半天还没发货</div>
+        </div>
+        <div class="option" data-dim="habit" data-val="info" data-hdim="TF" data-hval="F" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">介绍不清楚，完全不知道适不适合我</div>
+        </div>
+        <div class="option" data-dim="habit" data-val="notaste" data-hdim="TF" data-hval="F" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">没法试，买回来才知道好不好</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="15">
+      <div class="q-number">15</div>
+      <div class="q-text">如果有一张<span style="color:#E94560;font-weight:700;">3000减300</span>的满减券，你最可能用来买？</div>
+      <div class="options">
+        <div class="option" data-dim="habit" data-val="硬通货" data-hdim="SN" data-hval="S" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">五粮液或国窖这种硬通货，趁券入手</div>
+        </div>
+        <div class="option" data-dim="habit" data-val="whisky高端" data-hdim="SN" data-hval="N" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">之前种草的威士忌或干邑，终于有理由下单了</div>
+        </div>
+        <div class="option" data-dim="habit" data-val="口粮囤货" data-hdim="SN" data-hval="S" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">多囤几瓶日常口粮酒，囤着慢慢喝</div>
+        </div>
+        <div class="option" data-dim="habit" data-val="叠加冲高" data-hdim="SN" data-hval="N" onclick="selectOption(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">凑满3000再叠张券，冲一款平时舍不得买的</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="16">
+      <div class="q-number">16</div>
+      <div class="q-text">日常买酒，哪种福利最能打动你？（多选）</div>
+      <div class="options">
+        <div class="option" data-dim="multi2" data-val="打折" data-hdim="TF" data-hval="T" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">硬核打折，能省则省才是真理</div>
+        </div>
+        <div class="option" data-dim="multi2" data-val="试饮" data-hdim="SN" data-hval="N" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">新品优先试饮，尝过再决定</div>
+        </div>
+        <div class="option" data-dim="multi2" data-val="积分" data-hdim="TF" data-hval="T" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">积分翻倍，换点好东西</div>
+        </div>
+        <div class="option" data-dim="multi2" data-val="专属品" data-hdim="TF" data-hval="F" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">会员专属特供，别人买不到的</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="17">
+      <div class="q-number">17</div>
+      <div class="q-text">珠免出一款新品，什么情况你会想试试？（多选）</div>
+      <div class="options">
+        <div class="option" data-dim="multi3" data-val="品牌" data-hdim="SN" data-hval="S" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">大牌子或老字号出的，信得过</div>
+        </div>
+        <div class="option" data-dim="multi3" data-val="口碑" data-hdim="EI" data-hval="E" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">朋友圈都在聊，跟风试试</div>
+        </div>
+        <div class="option" data-dim="multi3" data-val="试饮" data-hdim="SN" data-hval="N" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">有免费试饮机会，不试白不试</div>
+        </div>
+        <div class="option" data-dim="multi3" data-val="包装" data-hdim="TF" data-hval="F" onclick="selectMulti(this)">
+          <div class="option-radio"></div>
+          <div class="option-label">包装太好看了，忍不住想买来摆着</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" data-q="18">
+      <div class="q-number">18</div>
+      <div class="q-text">最后一句真心话：在珠海免税买酒，你有什么想吐槽的？</div>
+      <textarea id="feedbackText" placeholder="随便说，我们认真听..." style="
+        width: 100%; min-height: 70px; padding: 12px; border: 2px solid #E8E4DF;
+        border-radius: 10px; font-size: 14px; font-family: inherit; resize: vertical;
+        outline: none; transition: border-color 0.2s;" oninput="this.style.borderColor='#2980B9';updateProgress()"></textarea>
+    </div>
+
+
+    <button class="submit-btn" id="submitBtn" disabled onclick="showResult()">🍸 查看我的酒鬼人格</button>
+  </div>
+
+  <!-- ===== 结果页 ===== -->
+  <div class="result-page" id="resultPage">
+    <div class="result-card" id="resultCard">
+      <div class="result-header" id="resultHeader">
+        <div class="big-emoji" id="resultEmoji">🍸</div>
+        <div class="result-code" id="resultCode">ESTJ</div>
+        <div class="result-name" id="resultName">社交酒司令</div>
+        <div class="result-tagline" id="resultTagline">不喝则已，喝就要有声有色</div>
+      </div>
+      <div class="result-body">
+        <div class="result-desc" id="resultDesc"></div>
+        
+
+                <div class="result-partner" id="resultPartner"></div>
+        <div class="result-tip" id="resultTip"></div>
+      </div>
+    </div>
+
+    <!-- 维度分析 -->
+    <div class="dimension-analysis">
+      <div class="da-title">📊 你的喝酒人格维度分析</div>
+      <div class="da-row">
+        <div class="da-label">场合</div>
+        <div class="da-bar-wrap">
+          <div class="da-bar-bg"><div class="da-bar" id="bar-EI" style="width:0%;background:linear-gradient(90deg,#3498DB,#9B59B6)"></div></div>
+        </div>
+        <div class="da-val" id="val-EI">-</div>
+      </div>
+      <div class="da-row">
+        <div class="da-label">选酒</div>
+        <div class="da-bar-wrap">
+          <div class="da-bar-bg"><div class="da-bar" id="bar-SN" style="width:0%;background:linear-gradient(90deg,#F39C12,#E74C3C)"></div></div>
+        </div>
+        <div class="da-val" id="val-SN">-</div>
+      </div>
+      <div class="da-row">
+        <div class="da-label">花钱</div>
+        <div class="da-bar-wrap">
+          <div class="da-bar-bg"><div class="da-bar" id="bar-TF" style="width:0%;background:linear-gradient(90deg,#1ABC9C,#2ECC71)"></div></div>
+        </div>
+        <div class="da-val" id="val-TF">-</div>
+      </div>
+      <div class="da-row">
+        <div class="da-label">决策</div>
+        <div class="da-bar-wrap">
+          <div class="da-bar-bg"><div class="da-bar" id="bar-JP" style="width:0%;background:linear-gradient(90deg,#E67E22,#D35400)"></div></div>
+        </div>
+        <div class="da-val" id="val-JP">-</div>
+      </div>
+    </div>
+
+    <!-- 优惠券 & 客服二维码 -->
+    <div class="coupon-area">
+      <div class="coupon-text">别忘了找管理员领取 👇</div>
+      <div class="coupon-value">「 60元茅台复购券 」</div>
+      <div class="coupon-action">回到社群截图你的结果页面发给好友吧！</div>
+    </div>
+
+    <!-- 微信客服二维码 -->
+    <div class="wechat-qr-section">
+      <div class="qr-title">📱 扫码添加专属客服</div>
+      <div class="qr-subtitle">获取专属优惠 · 第一手新品 · 1对1服务</div>
+      <div class="qr-container">
+        <img src="wechat-qr.png" alt="微信客服二维码" class="qr-image" onerror="this.onerror=null;this.src='wechat-qr.svg'">
+      </div>
+      <div class="qr-hint">长按识别二维码</div>
+    </div>
+
+    <div class="share-section">
+      <div class="share-hint">长按保存图片 或 截图发朋友圈</div>
+      <button class="share-btn" onclick="location.reload()">🔄 再测一次</button>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<script>
+// ========== 人格数据 ==========
+const PERSONALITIES = {
+  ESTJ: { emoji:'👑', name:'贵州飞天茅台 500ml', tagline:'王者出场，不怒自威',
+    desc:'酱香型白酒的天花板。53度，历经一年生产周期、四年以上储存才出厂。开瓶瞬间满屋飘香，入口绵柔回甘悠长。商务宴请的终极答案——桌上摆着它，话都不用多说。适合：重要场合撑场面、送礼硬通货、收藏升值。',
+    partner:'ESFP 麦卡伦致敬（一个热闹，一个镇场）',
+    tip:'这瓶酒的价值不在酒本身，在于它出现的那一刻，所有人都知道今天不简单',
+    color:'#C0392B' },
+  ESFP: { emoji:'✨', name:'麦卡伦致敬12年 700ml', tagline:'颜值即正义，好看到舍不得开',
+    desc:'苏格兰斯佩塞产区的明星单品，双桶陈酿（雪莉桶+波本桶），琥珀色酒体在灯光下像一块流动的蜜糖。花香与果香交织，甜而不腻，是威士忌世界里最好"入门"又最耐品的款之一。适合：朋友聚会、拍照发圈、第一次尝试威士忌。',
+    partner:'ESTJ 飞天茅台（你负责好看，它负责镇场）',
+    tip:'买了三个月还没开？没关系，摆着看也是一种享受',
+    color:'#D4A853' },
+  ENFJ: { emoji:'🤝', name:'五粮液52度 500ml', tagline:'浓香之王，和气生财',
+    desc:'五种粮食协同发酵，造就了它独特的复合香气。入口甘美净爽、各味协调。它是酒桌上的润滑剂——不管什么局，有五粮液在场就不会冷场。适合：家庭聚餐、商务宴请、老友重逢。',
+    partner:'ISFP 波摩14年（你暖场，它走心）',
+    tip:'你总是照顾所有人，但这杯该慢慢品，别一口闷了',
+    color:'#E74C3C' },
+  ENTP: { emoji:'🔬', name:'HIBIKI 大师精选 700ml', tagline:'日威巅峰，融合的艺术',
+    desc:'三得利的集大成之作，将多种原酒精心调和而成。融合了美国白橡木桶的清香与日本水楢木桶的独特檀香，口感层次丰富到每次喝都能发现新的细节。它是威士忌界的"极客之选"，越研究越上头。适合：细细品味、写测评分享、跟朋友科普。',
+    partner:'INTP 白州珍藏（你讲理论，它提供素材）',
+    tip:'别光顾着分析香气成分，偶尔也要单纯地享受一杯',
+    color:'#2980B9' },
+  ENTJ: { emoji:'💎', name:'麦卡伦15年 致敬 700ml', tagline:'雪莉桶标杆，投资级藏品',
+    desc:'麦卡伦雪莉桶系列的代表作，15年在顶级欧罗洛索雪莉橡木桶中熟成，深红宝石色酒体，浓缩了干果、巧克力、橙皮的浓郁风味。这是威士忌收藏圈的硬通货，年份越高越值钱。适合：重要收藏、高端礼品、自我犒赏。',
+    partner:'ISTJ 茅台王子（你布局，它守正）',
+    tip:'好东西值得等，但也别等到过期才想起打开',
+    color:'#8E44AD' },
+  ISTJ: { emoji:'🏛', name:'茅台王子 金王子 500ml', tagline:'经典传承，稳如泰山',
+    desc:'茅台股份公司出品，继承了茅台酱香工艺的核心基因。虽非飞天，但品质稳定可靠，酱香突出、幽雅细腻。它是那些"不追求花哨、只信赖时间验证过品牌"的人的首选口粮。适合：日常小酌、自饮口粮、性价比之选。',
+    partner:'ENTJ 麦卡伦15年（你守阵地，它打天下）',
+    tip:'偶尔试试别的品牌，世界不会塌',
+    color:'#2C3E50' },
+  ISFJ: { emoji:'🌸', name:'青花汾酒20年 42度 500ml', tagline:'清香优雅，温润如玉',
+    desc:'山西汾酒的中坚力量，"清、正、甜、净、长"五字真言的最佳诠释。42度低度版本入口更柔和，豌豆香与米香交织，像一位不善言辞却始终在身边的人。适合：日常自饮、配菜百搭、送长辈。',
+    partner:'ENFJ 五粮液（你默默付出，它高调暖场）',
+    tip:'别人夸的时候记得说一句：这是我常备的那款',
+    color:'#16A085' },
+  ISTP: { emoji:'🥃', name:'百富12年 黄金桶 700ml', tagline:'独酌神器，一个人的精彩',
+    desc:'苏格兰百富的经典入门款，首次在美国传统橡木桶（黄金桶）中熟成，蜂蜜香与香草甜平衡得恰到好处。冰块+水或者纯饮都很棒，是那种下班回家倒上一杯、放首音乐就能把一天抛诸脑后的存在。适合：独自小酌、周末宅家、新手入坑。',
+    partner:'INTP 白州珍藏（你调配，它分析原理）',
+    tip:'偶尔调一杯给朋友尝尝，说不定有人跟你一样爱上',
+    color:'#F39C12' },
+  INFP: { emoji:'🌊', name:'波摩16年 单一麦芽 700ml', tagline:'艾雷岛烟魂，深邃迷人',
+    desc:'来自苏格兰艾雷岛，以泥煤烟熏风味闻名于世。16年的岁月让原本强烈的烟熏感变得柔和内敛，海盐、干果和淡淡碘伏的气息层层展开，像一首需要安静下来才能读懂的诗。适合：深夜独饮、雨天发呆、情绪低落时治愈。',
+    partner:'INFJ 大摩14年（你们都是深沉那一挂的）',
+    tip:'别总想着留到特殊日子再开，今晚就是最好的时机',
+    color:'#34495E' },
+  INFJ: { emoji:'🗝', name:'大摩14年 单一麦芽 750ml', tagline:'时间的礼物，沉默的奢华',
+    desc:'高地威士忌中的优雅代表，14年在不同类型的橡木桶中辗转熟成，最终呈现出柑橘、杏仁与巧克力的精致平衡。它不张扬，但每一口都在告诉你：好东西不需要大声喧哗。适合：重要时刻、珍贵馈赠、静静品味。',
+    partner:'INFP 波摩16年（你们彼此懂得那份执念）',
+    tip:'收藏是为了更好的品尝，别忘了给它一个亮相的机会',
+    color:'#7F8C8D' },
+  INTJ: { emoji:'🏆', name:'国窖1573 礼盒装 375ml', tagline:'战略储备，价值锚点',
+    desc:'泸州老窖的核心产品，源自明朝万历年间持续使用至今的国宝窖池群酿造。浓香型白酒的品质标杆，375ml礼盒装精致体面，是那种"不用拿出来就已经赢了"的存在。适合：战略收藏、高端礼品、关键时刻亮底牌。',
+    partner:'ENTP HIBIKI大师精选（你有底蕴，它有话题）',
+    tip:'规划得很好，但偶尔也要亲自下场喝一杯',
+    color:'#C0392B' },
+  INTP: { emoji:'🌿', name:'白州珍藏 单一麦芽 700ml', tagline:'森林里的实验室样本',
+    desc:'三得利白州蒸馏所出品，位于森林环绕的高地，水源纯净、空气清新。这款珍藏版带有独特的草本植物气息和轻盈的烟熏感，每一口都像在做感官实验。越喝越想知道：这个味道到底从哪来？适合：研究型饮酒、探索风味边界、写品鉴笔记。',
+    partner:'ISTP 百富12年（你分析，它实操）',
+    tip:'笔记可以记，但酒也要喝完才行',
+    color:'#27AE60' },
+  ISFP: { emoji:'🎭', name:'波摩14年 700ml', tagline:'艺术品般的烟熏表达',
+    desc:'艾雷岛波摩的中坚力量，14年让泥煤烟熏从"冲击"变成了"艺术"。深琥珀色酒体带着海风和篝火的记忆，每一口都像在看一部画面感极强的文艺片。适合：一个人静静品、配电影或音乐、灵感枯竭时寻找触动。',
+    partner:'ENFJ 五粮液（你需要被照顾，它负责热闹）',
+    tip:'好的东西值得分享，哪怕只是倒一小杯给懂的人',
+    color:'#E67E22' },
+  ESTP: { emoji:'⚡', name:'尊尼获加 黑牌 1L', tagline:'量大管饱，随时开整',
+    desc:'全球销量最大的调和威士忌之一，1升大包装，价格实在，风味扎实——烟熏、香料、果香混在一起，不讲究什么层次，就是好入口够劲。它是那种"今晚想喝了直接去便利店拎一瓶回来"的存在。适合：即兴派对、量大管饱、不想纠结选酒时。',
+    partner:'ISFJ 青花20年（你冲在前头，它善后）',
+    tip:'冲动买的第N瓶了？酒柜还有3瓶没开吧……',
+    color:'#2C3E50' },
+  ENFP: { emoji:'🎪', name:'格兰杰经典 1000ml', tagline:'万能搭子，快乐源泉',
+    desc:'苏格兰高地单一麦芽威士忌的国民级产品，花香果香清新明快，1000ml大瓶装性价比拉满。调鸡尾酒、纯饮、配苏打水、做highball都行，就像一个永远有精力、永远能接住你所有奇思妙想的朋友。适合：调酒实验、朋友聚会、怎么喝都不会错。',
+    partner:'INFP 波摩16年（你安利，它买单）',
+    tip:'又买了一瓶新的？上次那瓶开了吗？',
+    color:'#E74C3C' },
+};// ========== 状态管理 ==========
+const answers = {}; // qNum -> value
+const dimScores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+const testQuestions = new Set([1,2,3,4,5,6,7,8]);
+let answeredCount = 0;
+
+// ========== 交互逻辑 ==========
+function selectOption(el) {
+  const card = el.closest('.question-card');
+  const q = parseInt(card.dataset.q);
+  const dim = el.dataset.dim;
+  const val = el.dataset.val;
+  const hdim = el.dataset.hdim;   // 隐藏维度
+  const hval = el.dataset.hval;   // 隐藏维度值
+
+  // 同题取消其他选中
+  const siblings = card.querySelectorAll('.option');
+  siblings.forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+
+  // 如果之前答过这道题（主维度），先扣分
+  if (answers[q] && dimScores[answers[q]] !== undefined) {
+    dimScores[answers[q]]--;
+  }
+  // 如果之前有隐藏维度分数，先扣掉
+  if (answers[q] && answers[q + '_hdim']) {
+    dimScores[answers[q + '_hdim']] -= 0.5;
+  }
+  answers[q] = val;
+
+  // 主维度计分（前8题 = 权重1）
+  if (dimScores[val] !== undefined) {
+    dimScores[val]++;
+  }
+
+  // 隐藏辅助维度计分（Q9+ = 权重0.5，不展示给用户）
+  if (hdim && hval && dimScores[hval] !== undefined) {
+    dimScores[hval] += 0.5;
+    answers[q + '_hdim'] = hval; // 记录以便切换时扣分
+  }
+
+  updateProgress();
+}
+
+function selectMulti(el) {
+  el.classList.toggle('selected');
+  const q = el.closest('.question-card').dataset.q;
+  const hdim = el.dataset.hdim;   // 隐藏维度
+  const hval = el.dataset.hval;   // 隐藏维度值
+
+  if (!answers[q]) {
+    answers[q] = [];
+    answers[q + '_hdims'] = []; // 记录隐藏维度值列表
+  }
+  const val = el.dataset.val;
+  if (el.classList.contains('selected')) {
+    if (!answers[q].includes(val)) {
+      answers[q].push(val);
+      // 多选题隐藏维度：每选一个加0.5分
+      if (hdim && hval && dimScores[hval] !== undefined) {
+        dimScores[hval] += 0.5;
+        answers[q + '_hdims'].push(hval); // 记录扣分用
+      }
+    }
+  } else {
+    answers[q] = answers[q].filter(v => v !== val);
+    // 取消选择时扣除对应隐藏维度分
+    if (hdim && hval && dimScores[hval] !== undefined) {
+      dimScores[hval] -= 0.5;
+      answers[q + '_hdims'] = answers[q + '_hdims'].filter(v => v !== hval);
+    }
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  let count = 0;
+  document.querySelectorAll('.question-card').forEach(card => {
+    const q = card.dataset.q;
+    // 单选/多选题：有答案即算完成；Q18文本框：有内容也算
+    if ((answers[q] && !(answers[q] instanceof Array) && answers[q].length > 0)
+        || (answers[q] instanceof Array && answers[q].length > 0)
+        || (q == '18' && document.getElementById('feedbackText') && document.getElementById('feedbackText').value.trim())) {
+      count++;
+    }
+  });
+  answeredCount = count;
+  const pct = Math.round((count / 14) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = count + '/14';
+  document.getElementById('submitBtn').disabled = (count < 8);
+}
+
+// ========== 显示结果 ==========
+function showResult() {
+  // 计算MBTI
+  const mbti =
+    (dimScores.E >= dimScores.I ? 'E' : 'I') +
+    (dimScores.S >= dimScores.N ? 'S' : 'N') +
+    (dimScores.T >= dimScores.F ? 'T' : 'F') +
+    (dimScores.J >= dimScores.P ? 'J' : 'P');
+
+  const p = PERSONALITIES[mbti];
+
+  // 填充结果
+  document.getElementById('resultEmoji').textContent = p.emoji;
+  document.getElementById('resultCode').textContent = mbti;
+  document.getElementById('resultCode').style.color = p.color;
+  document.getElementById('resultName').textContent = p.name;
+  document.getElementById('resultHeader').style.background = `linear-gradient(135deg, ${p.color}15, ${p.color}08)`;
+  document.getElementById('resultTagline').textContent = p.tagline;
+  document.getElementById('resultDesc').textContent = p.desc;
+  document.getElementById('resultPartner').innerHTML = '<strong>🤝 最佳酒搭子：</strong>' + p.partner;
+  document.getElementById('resultTip').innerHTML = '<strong>⚠️ 小提醒：</strong>' + p.tip;
+
+  // 维度分析条形图
+  setTimeout(() => {
+    const ePct = dimScores.E + dimScores.I > 0 ? Math.round(dimScores.E / (dimScores.E+dimScores.I) * 100) : 50;
+    const sPct = dimScores.S + dimScores.N > 0 ? Math.round(dimScores.S / (dimScores.S+dimScores.N) * 100) : 50;
+    const tPct = dimScores.T + dimScores.F > 0 ? Math.round(dimScores.T / (dimScores.T+dimScores.F) * 100) : 50;
+    const jPct = dimScores.J + dimScores.P > 0 ? Math.round(dimScores.J / (dimScores.J+dimScores.P) * 100) : 50;
+
+    document.getElementById('bar-EI').style.width = ePct + '%';
+    document.getElementById('bar-SN').style.width = sPct + '%';
+    document.getElementById('bar-TF').style.width = tPct + '%';
+    document.getElementById('bar-JP').style.width = jPct + '%';
+
+    document.getElementById('val-EI').textContent = (dimScores.E>=dimScores.I?'E':'I') + ePct+'%';
+    document.getElementById('val-SN').textContent = (dimScores.S>=dimScores.N?'S':'N') + sPct+'%';
+    document.getElementById('val-TF').textContent = (dimScores.T>=dimScores.F?'T':'F') + tPct+'%';
+    document.getElementById('val-JP').textContent = (dimScores.J>=dimScores.P?'J':'P') + jPct+'%';
+  }, 300);
+
+  // 切换页面
+  document.getElementById('testPage').classList.add('hidden');
+  document.getElementById('resultPage').classList.add('show');
+  
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  console.log('=== 测试结果 ===');
+  console.log('MBTI类型:', mbti, p.name);
+  console.log('维度得分:', JSON.stringify(dimScores));
+  console.log('所有答案:', JSON.stringify(answers));
+
+  // ========== 数据提交到后台 ==========
+  submitToBackend(mbti, p.name);
+}
+
+function submitToBackend(mbti, typeName) {
+  const payload = {
+    timestamp: new Date().toISOString(),
+    mbti_type: mbti,
+    type_name: typeName,
+    dim_scores: { E: dimScores.E, I: dimScores.I, S: dimScores.S, N: dimScores.N, T: dimScores.T, F: dimScores.F, J: dimScores.J, P: dimScores.P },
+    answers: answers,
+    ua: navigator.userAgent,
+    screen: `${screen.width}x${screen.height}`
+  };
+
+  // 提交到后端（静默失败，不影响用户体验）
+  fetch('/api/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) console.log('数据已提交，记录ID:', d.id);
+    else console.warn('提交异常:', d.error);
+  })
+  .catch(err => {
+    // 网络错误时存入localStorage，稍后重试
+    const pending = JSON.parse(localStorage.getItem('zm_pending') || '[]');
+    pending.push(payload);
+    localStorage.setItem('zm_pending', JSON.stringify(pending));
+    console.log('离线存储，待重试。已缓存', pending.length, '条');
+  });
+}
+</script>
+</body>
+</html>
