@@ -507,7 +507,57 @@
     .submit-btn, .share-btn, .progress-bar { display: none; }
     .result-card { box-shadow: none; border: 1px solid #EEE; }
   }
+
+  /* ===== 分享/保存按钮 ===== */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin: 16px 0 8px;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .action-btn:active { transform: scale(0.96); }
+  .save-btn {
+    background: linear-gradient(135deg, #E94560, #c0392b);
+    color: white;
+    box-shadow: 0 4px 12px rgba(233,69,96,0.3);
+  }
+  .share-btn {
+    background: linear-gradient(135deg, #2ECC71, #27AE60);
+    color: white;
+    box-shadow: 0 4px 12px rgba(46,204,113,0.3);
+  }
+  /* 分享提示浮层 */
+  .toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: rgba(0,0,0,0.78);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+    pointer-events: none;
+  }
+  @keyframes fadeIn { from { opacity:0; transform: translate(-50%,-60%); } to { opacity:1; transform: translate(-50%,-50%); } }
+
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -974,10 +1024,15 @@
       <div class="qr-hint">长按识别二维码</div>
     </div>
 
-    <div class="share-section">
-      <div class="share-hint">长按保存图片 或 截图发朋友圈</div>
-      <button class="share-btn" onclick="location.reload()">🔄 再测一次</button>
+    <!-- 保存图片 + 分享按钮 -->
+    <div class="action-bar">
+      <button class="action-btn save-btn" onclick="saveImage()">💾 保存图片</button>
+      <button class="action-btn share-btn" onclick="shareResult()">🔗 分享给好友</button>
     </div>
+    <div class="action-bar" style="margin-top:4px">
+      <button class="share-btn" style="flex:1;border-radius:12px;padding:11px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#E94560,#c0392b);color:white;border:none;box-shadow:0 4px 12px rgba(233,69,96,0.2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="location.reload()">🔄 再测一次</button>
+    </div>
+    <div id="resultCard" style="display:none"></div>
 
     <div class="spacer"></div>
   </div>
@@ -1176,6 +1231,9 @@ function showResult() {
   document.getElementById('resultPartner').innerHTML = '<strong>🤝 最佳酒搭子：</strong>' + p.partner;
   document.getElementById('resultTip').innerHTML = '<strong>⚠️ 小提醒：</strong>' + p.tip;
 
+  // 供保存图片功能使用
+  window._currentPersonality = p;
+
   // 维度分析条形图
   setTimeout(() => {
     const ePct = dimScores.E + dimScores.I > 0 ? Math.round(dimScores.E / (dimScores.E+dimScores.I) * 100) : 50;
@@ -1240,6 +1298,105 @@ function submitToBackend(mbti, typeName) {
     console.log('离线存储，待重试。已缓存', pending.length, '条');
   });
 }
+
+// ========== 保存图片 ==========
+async function saveImage() {
+  const toastEl = document.createElement('div');
+  toastEl.className = 'toast';
+  toastEl.textContent = '📸 正在生成图片…';
+  document.body.appendChild(toastEl);
+
+  try {
+    // 获取结果卡片（已渲染好的完整结果）
+    const card = document.getElementById('resultCard');
+    // 复制结果页HTML到临时div，隐藏微信二维码避免CORS
+    const tmp = document.createElement('div');
+    tmp.style.cssText = 'position:fixed;left:-9999px;top:0;width:480px;padding:20px;background:#F8F7F4;font-family:-apple-system,Helvetica Neue,PingFang SC,Microsoft YaHei,sans-serif';
+
+    // 构建结果卡片的干净版本（不含二维码区）
+    const p = window._currentPersonality || {};
+    const mbti = document.getElementById('resultCode')?.textContent || '';
+    const name = document.getElementById('resultName')?.textContent || '';
+    const tagline = document.getElementById('resultTagline')?.textContent || '';
+    const desc = document.getElementById('resultDesc')?.textContent || '';
+    const emoji = document.getElementById('resultEmoji')?.textContent || '🍸';
+    const color = p.color || '#E94560';
+
+    tmp.innerHTML = `
+      <div style="background:linear-gradient(135deg,${color}18,${color}08);border-radius:20px;padding:28px 24px;border:2px solid ${color}30">
+        <div style="font-size:52px;text-align:center;margin-bottom:12px">${emoji}</div>
+        <div style="text-align:center;font-size:32px;font-weight:800;color:${color};margin-bottom:6px">${mbti}</div>
+        <div style="text-align:center;font-size:17px;font-weight:700;color:#333;margin-bottom:4px">${name}</div>
+        <div style="text-align:center;font-size:13px;color:#888;margin-bottom:18px">${tagline}</div>
+        <div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:16px">${desc}</div>
+        <div style="text-align:center;padding:12px;background:rgba(0,0,0,0.04);border-radius:10px;font-size:12px;color:#888">🍸 珠免酒鬼人格测试 · 珠海免税</div>
+      </div>`;
+    document.body.appendChild(tmp);
+
+    const canvas = await html2canvas(tmp, {
+      backgroundColor: '#F8F7F4',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      width: 480,
+    });
+
+    document.body.removeChild(tmp);
+
+    const link = document.createElement('a');
+    link.download = `珠免酒鬼人格_${mbti}_${name.replace(/\s+/g,'')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    toastEl.textContent = '✅ 图片已保存';
+    setTimeout(() => toastEl.remove(), 1800);
+  } catch (err) {
+    toastEl.textContent = '⚠️ 保存失败，请截图';
+    console.error(err);
+    setTimeout(() => toastEl.remove(), 2000);
+  }
+}
+
+// ========== 分享 ==========
+async function shareResult() {
+  const mbti = document.getElementById('resultCode')?.textContent || '';
+  const name = document.getElementById('resultName')?.textContent || '';
+  const emoji = document.getElementById('resultEmoji')?.textContent || '🍸';
+  const tagline = document.getElementById('resultTagline')?.textContent || '';
+
+  const shareText = `${emoji} 我的喝酒人格是 **${mbti} · ${name}**
+"${tagline}"
+👇 测试一下你是哪种酒鬼 🍸`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `珠免酒鬼人格测试 | ${mbti} ${name}`,
+        text: shareText,
+        url: window.location.href.split('?')[0],
+      });
+    } catch(e) { /* user cancelled */ }
+  } else {
+    // 复制到剪贴板
+    try {
+      await navigator.clipboard.writeText(shareText + '\n' + (window.location.href.split('?')[0]));
+      showToast('📋 分享文案已复制，去粘贴吧！');
+    } catch {
+      showToast('⚠️ 复制失败，请手动长按复制');
+    }
+  }
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// 保存当前人格数据供saveImage使用
+window._currentPersonality = null;
 </script>
 </body>
 </html>
